@@ -77,7 +77,7 @@ jobs:
         run: |
           export HL2SDKCS2=/home/runner/work/CS2Fixes/CS2Fixes/project/sdk
           cd project && mkdir build && cd build
-          python ../configure.py -s cs2 
+          python ../configure.py --enable-debug -s cs2 
           ambuild
       - name: Upload artifact
         uses: actions/upload-artifact@v3
