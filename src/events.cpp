@@ -158,6 +158,18 @@ GAME_EVENT_F(player_spawn)
         	{
             		pController->m_szClan("[HELPER]");     				
         	} 		
+		else if (pZEPlayer->IsAdminFlagSet(ADMFLAG_RESERVATION))				
+        	{
+            		pController->m_szClan("[VIP]");     				
+        	} 
+		else if (pZEPlayer->IsAdminFlagSet(ADMFLAG_RESERVATION))				
+        	{
+            		pController->m_szClan("[VIP]");     				
+        	} 
+		else 			
+        	{
+            		pController->m_szClan("[BroSena]");     				
+        	}
 
 		CBasePlayerPawn *pPawn = pController->GetPawn();
 
