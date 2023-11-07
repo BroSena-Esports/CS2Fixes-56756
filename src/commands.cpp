@@ -155,11 +155,11 @@ void ParseChatCommand(const char *pMessage, CCSPlayerController *pController)
 	{
 		(*g_CommandList[index])(args, pController);
 	}
-	else
-	{
-		ClientPrint(pController, HUD_PRINTTALK, CHAT_PREFIX"This command does not exist.");
-		//ParseWeaponCommand(pController, args[0]);
-	}
+	// else
+	// {
+	// 	ClientPrint(pController, HUD_PRINTTALK, CHAT_PREFIX"This command does not exist.");
+	// 	//ParseWeaponCommand(pController, args[0]);
+	// }
 }
 
 bool CChatCommand::CheckCommandAccess(CBasePlayerController *pPlayer, uint64 flags)
