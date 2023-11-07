@@ -113,10 +113,10 @@ CS2Fixes g_CS2Fixes;
 ConVar sample_cvar("sample_cvar", "42", 0);
 #endif
 
-CON_COMMAND_F(sample_commands, "Sample command", FCVAR_SPONLY | FCVAR_LINKED_CONCOMMAND)
-{
-	Message( "Sample command called by %d. Command: %s\n", context.GetPlayerSlot(), args.GetCommandString() );
-}
+// CON_COMMAND_F(sample_commands, "Sample command", FCVAR_SPONLY | FCVAR_LINKED_CONCOMMAND)
+// {
+// 	Message( "Sample command called by %d. Command: %s\n", context.GetPlayerSlot(), args.GetCommandString() );
+// }
 
 CON_COMMAND_F(toggle_logs, "Toggle printing most logs and warnings", FCVAR_SPONLY | FCVAR_LINKED_CONCOMMAND)
 {
