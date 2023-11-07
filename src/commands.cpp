@@ -141,26 +141,26 @@ void ParseWeaponCommand(CCSPlayerController *pController, const char *pszWeaponN
 	}
 }
  
-// void ParseChatCommand(const char *pMessage, CCSPlayerController *pController)
-// {
-// 	if (!pController || !pController->IsConnected())
-// 		return;
+void ParseChatCommand(const char *pMessage, CCSPlayerController *pController)
+{
+	if (!pController || !pController->IsConnected())
+		return;
 
-// 	CCommand args;
-// 	args.Tokenize(pMessage + 1);
+	CCommand args;
+	args.Tokenize(pMessage + 1);
 
-// 	uint16 index = g_CommandList.Find(hash_32_fnv1a_const(args[0]));
+	uint16 index = g_CommandList.Find(hash_32_fnv1a_const(args[0]));
 
-// 	if (g_CommandList.IsValidIndex(index))
-// 	{
-// 		(*g_CommandList[index])(args, pController);
-// 	}
-// 	else
-// 	{
-// 		ClientPrint(pController, HUD_PRINTTALK, CHAT_PREFIX"This command does not exist.");
-// 		//ParseWeaponCommand(pController, args[0]);
-// 	}
-// }
+	if (g_CommandList.IsValidIndex(index))
+	{
+		(*g_CommandList[index])(args, pController);
+	}
+	else
+	{
+		//ClientPrint(pController, HUD_PRINTTALK, CHAT_PREFIX"This command does not exist.");
+		ParseWeaponCommand(pController, args[0]);
+	}
+}
 
 bool CChatCommand::CheckCommandAccess(CBasePlayerController *pPlayer, uint64 flags)
 {
