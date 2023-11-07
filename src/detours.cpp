@@ -236,8 +236,12 @@ void FASTCALL Detour_UTIL_SayText2Filter(
         {
             V_snprintf(sBuffer, sizeof(sBuffer), " \1[\2HELPER\1]\14 %s: \2%s", param1, param2);
         }
+	else if ( pPlayer->IsAdminFlagSet(ADMFLAG_RESERVATION)) //a
+        {
+            V_snprintf(sBuffer, sizeof(sBuffer), " \1[\2 VIP \1]\14 %s: \2%s", param1, param2);
+        }
         else {
-            V_snprintf(sBuffer, sizeof(sBuffer), " \1[\4Player\1]\1 %s: \1%s", param1, param2);
+            V_snprintf(sBuffer, sizeof(sBuffer), " \1[\4 BroSena \1]\1 %s: \1%s", param1, param2);
         }
 
     UTIL_SayTextFilter(filter, sBuffer, pEntity, eMessageType);
