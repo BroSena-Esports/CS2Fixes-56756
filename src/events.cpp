@@ -166,10 +166,7 @@ GAME_EVENT_F(player_spawn)
         	{
             		pController->m_szClan("[VIP]");     				
         	} 
-		else 			
-        	{
-            		pController->m_szClan("[BroSena]");     				
-        	}
+
 
 		CBasePlayerPawn *pPawn = pController->GetPawn();
 
