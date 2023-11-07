@@ -38,7 +38,6 @@
 extern CEntitySystem *g_pEntitySystem;
 extern IVEngineServer2* g_pEngineServer2;
 extern ISteamHTTP* g_http;
-#include "addons.h"
 
 WeaponMapEntry_t WeaponMap[] = {
 	{"bizon",		  "weapon_bizon",			 1400, 26},
@@ -140,7 +139,7 @@ void ParseWeaponCommand(CCSPlayerController *pController, const char *pszWeaponN
 		}
 	}
 }
- 
+
 void ParseChatCommand(const char *pMessage, CCSPlayerController *pController)
 {
 	if (!pController || !pController->IsConnected())
@@ -157,7 +156,6 @@ void ParseChatCommand(const char *pMessage, CCSPlayerController *pController)
 	}
 	else
 	{
-		//ClientPrint(pController, HUD_PRINTTALK, CHAT_PREFIX"This command does not exist.");
 		ParseWeaponCommand(pController, args[0]);
 	}
 }
@@ -210,7 +208,7 @@ void ClientPrint(CBasePlayerController *player, int hud_dest, const char *msg, .
 		ConMsg("%s\n", buf);
 }
 
-CON_COMMAND_CHAT(sound, "toggle weapon sounds")
+CON_COMMAND_CHAT(stopsound, "toggle weapon sounds")
 {
 	if (!player)
 		return;
@@ -223,6 +221,105 @@ CON_COMMAND_CHAT(sound, "toggle weapon sounds")
 	g_playerManager->SetPlayerSilenceSound(iPlayer, !bSilencedSet && !bStopSet);
 
 	ClientPrint(player, HUD_PRINTTALK, CHAT_PREFIX "You have %s weapon sounds.", bSilencedSet ? "disabled" : !bSilencedSet && !bStopSet ? "silenced" : "enabled");
+}
+
+CON_COMMAND_CHAT(toggledecals, "toggle world decals, if you're into having 10 fps in ZE")
+{
+	if (!player)
+		return;
+
+	int iPlayer = player->GetPlayerSlot();
+	bool bSet = !g_playerManager->IsPlayerUsingStopDecals(iPlayer);
+
+	g_playerManager->SetPlayerStopDecals(iPlayer, bSet);
+
+	ClientPrint(player, HUD_PRINTTALK, CHAT_PREFIX "You have %s world decals.", bSet ? "disabled" : "enabled");
+}
+
+CON_COMMAND_CHAT(myuid, "test")
+{
+	if (!player)
+		return;
+
+	int iPlayer = player->GetPlayerSlot();
+
+	ClientPrint(player, HUD_PRINTTALK, CHAT_PREFIX "Your userid is %i, slot: %i, retrieved slot: %i", g_pEngineServer2->GetPlayerUserId(iPlayer).Get(), iPlayer, g_playerManager->GetSlotFromUserId(g_pEngineServer2->GetPlayerUserId(iPlayer).Get()));
+}
+
+// CONVAR_TODO
+static constexpr float g_flMaxZteleDistance = 150.0f;
+
+CON_COMMAND_CHAT(ztele, "teleport to spawn")
+{
+	if (!player)
+	{
+		ClientPrint(player, HUD_PRINTCONSOLE, CHAT_PREFIX "You cannot use this command from the server console.");
+		return;
+	}
+
+	//Count spawnpoints (info_player_counterterrorist & info_player_terrorist)
+	SpawnPoint* spawn = nullptr;
+	CUtlVector<SpawnPoint*> spawns;
+	while (nullptr != (spawn = (SpawnPoint*)UTIL_FindEntityByClassname(spawn, "info_player_*")))
+	{
+		if (spawn->m_bEnabled())
+			spawns.AddToTail(spawn);
+	}
+
+	// Let's be real here, this should NEVER happen
+	// But I ran into this when I switched to the real FindEntityByClassname and forgot to insert a *
+	if (spawns.Count() == 0)
+	{
+		ClientPrint(player, HUD_PRINTTALK, CHAT_PREFIX"There are no spawns!");
+		Panic("ztele used while there are no spawns!\n");
+		return;
+	}
+
+	//Pick and get position of random spawnpoint
+	int randomindex = rand() % spawns.Count();
+	Vector spawnpos = spawns[randomindex]->GetAbsOrigin();
+
+	//Here's where the mess starts
+	CBasePlayerPawn* pPawn = player->GetPawn();
+
+	if (!pPawn)
+		return;
+
+	if (!pPawn->IsAlive())
+	{
+		ClientPrint(player, HUD_PRINTTALK, CHAT_PREFIX"You cannot teleport when dead!");
+		return;
+	}
+
+	//Get initial player position so we can do distance check
+	Vector initialpos = pPawn->GetAbsOrigin();
+
+	ClientPrint(player, HUD_PRINTTALK, CHAT_PREFIX"Teleporting to spawn in 5 seconds.");
+
+	CHandle<CBasePlayerPawn> handle = pPawn->GetHandle();
+
+	new CTimer(5.0f, false, [spawnpos, handle, initialpos]()
+	{
+		CBasePlayerPawn *pPawn = handle.Get();
+
+		if (!pPawn)
+			return -1.0f;
+
+		Vector endpos = pPawn->GetAbsOrigin();
+
+		if (initialpos.DistTo(endpos) < g_flMaxZteleDistance)
+		{
+			pPawn->SetAbsOrigin(spawnpos);
+			ClientPrint(pPawn->GetController(), HUD_PRINTTALK, CHAT_PREFIX "You have been teleported to spawn.");
+		}
+		else
+		{
+			ClientPrint(pPawn->GetController(), HUD_PRINTTALK, CHAT_PREFIX "Teleport failed! You moved too far.");
+			return -1.0f;
+		}
+		
+		return -1.0f;
+	});
 }
 
 // CONVAR_TODO
@@ -297,6 +394,11 @@ CON_COMMAND_CHAT(message, "message someone")
 	CSingleRecipientFilter filter(uid);
 
 	UTIL_SayTextFilter(filter, buf, nullptr, 0);
+}
+
+CON_COMMAND_CHAT(say, "say something using console")
+{
+	ClientPrintAll(HUD_PRINTTALK, "%s", args.ArgS());
 }
 
 CON_COMMAND_CHAT(takemoney, "take your money")
